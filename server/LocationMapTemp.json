@@ -1,0 +1,18 @@
+{
+  "HOSTNAME": {
+    "hostname": "HOSTNAME",
+    "offset": 0,
+    "cartID": "CARTID",
+    "brightness": 1,
+    "position": "POS",
+    "blinkCycle": 0.1,
+    "modifyUser": "16683",
+    "online": true,
+    "floor": "3F",
+    "invert": true,
+    "org": "ORG",
+    "insertDatetime": "2020-04-21T16:25:41.593",
+    "modifyTime": "2020-04-21T08:25:41.037",
+    "numbers": 25
+  }
+}
