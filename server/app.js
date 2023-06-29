@@ -138,10 +138,6 @@ function createConfig(config) {
           reject(copyFileError);
         }
         const setHostnameError = await setHostname(Object.keys(config)[0]);
-        if (setHostnameError) {
-          console.error(setHostnameError);
-          reject(setHostnameError);
-        }
         resolve();
       })
       .catch((err) => {
@@ -172,20 +168,19 @@ function copyFile(fileName, destination) {
 
 function setHostname(hostname) {
   return new Promise((resolve, reject) => {
-    exec(`sudo bash editHostname.sh ${hostname}`, (error, stdoutm, stderr) => {
-      if (error) {
-        console.error(`error: ${error.message}`);
-        reject(error.message);
-        return;
+    exec(
+      `sudo bash editHostname.sh ${hostname} 2>/dec/null`,
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`error: ${error.message}`);
+        }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
+        console.log(`stdout: ${stdout}`);
+        resolve();
       }
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-        reject(stderr);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-      resolve(stdout);
-    });
+    );
   });
 }
 
