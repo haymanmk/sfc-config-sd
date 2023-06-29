@@ -169,7 +169,7 @@ function copyFile(fileName, destination) {
 function setHostname(hostname) {
   return new Promise((resolve, reject) => {
     exec(
-      `sudo bash editHostname.sh ${hostname} 2>/dec/null`,
+      `sudo bash editHostname.sh ${hostname} 2>/dev/null`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(`error: ${error.message}`);
