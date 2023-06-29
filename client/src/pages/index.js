@@ -175,8 +175,9 @@ const Page = () => {
                   <TableBody>
                     {cartInfo &&
                       Object.entries(cartInfo).map(([key, value]) => {
+                        let id = 0;
                         return (
-                          <TableRow>
+                          <TableRow key={id++}>
                             <TableCell>{key}</TableCell>
                             <TableCell>{value.toString()}</TableCell>
                           </TableRow>
