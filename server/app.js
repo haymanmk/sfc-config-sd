@@ -131,15 +131,18 @@ function retrieveConfig() {
 function createConfig(config) {
   return new Promise((resolve, reject) => {
     writeFile(fileName, JSON.stringify(config))
-      .then(() => {
-        copyFile(fileName, destinationPath)
-          .then((stdout) => {
-            console.log("Succeed to create a file.");
-            resolve();
-          })
-          .catch((err) => {
-            reject(err);
-          });
+      .then(async () => {
+        const copyFileError = await copyFile(fileName, destinationPath);
+        if (copyFileError) {
+          console.error(copyFileError);
+          reject(copyFileError);
+        }
+        const setHostnameError = await setHostname(Object.keys(config)[0]);
+        if (setHostnameError) {
+          console.error(setHostnameError);
+          reject(setHostnameError);
+        }
+        resolve();
       })
       .catch((err) => {
         console.error(err);
@@ -151,6 +154,25 @@ function createConfig(config) {
 function copyFile(fileName, destination) {
   return new Promise((resolve, reject) => {
     exec(`sudo cp ${fileName} ${destination}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`error: ${error.message}`);
+        reject(error.message);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        reject(stderr);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      resolve();
+    });
+  });
+}
+
+function setHostname(hostname) {
+  return new Promise((resolve, reject) => {
+    exec(`sudo bash editHostname.sh ${hostname}`, (error, stdoutm, stderr) => {
       if (error) {
         console.error(`error: ${error.message}`);
         reject(error.message);
@@ -180,5 +202,3 @@ function powerOff() {
     console.log(`stdout: ${stdout}`);
   });
 }
-// createConfig({ hostname: initConfig });
-// retrieveConfig();
