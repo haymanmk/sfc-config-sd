@@ -27,6 +27,7 @@ const initConfig = {
   modifyTime: "2020-04-21T08:25:41.037",
   numbers: 25,
 };
+const ignoredErrorMessages = ["Name or service not known"];
 
 app.route("/config").post((req, res, next) => {
   const body = req.body;
@@ -74,7 +75,7 @@ app.route("/config").post((req, res, next) => {
             const errorMsg = `Unknown error occurred: ${err}`;
             replyMsg.status = "failed";
             replyMsg.msg = errorMsg;
-            console.error(errorMsg);
+            console.error(`[createConfig ERROR] ${errorMsg}`);
             res.status(500).send(replyMsg);
           });
       else {
@@ -134,14 +135,18 @@ function createConfig(config) {
       .then(async () => {
         const copyFileError = await copyFile(fileName, destinationPath);
         if (copyFileError) {
-          console.error(copyFileError);
+          console.error(`ERROR while copy file: ${copyFileError}`);
           reject(copyFileError);
         }
         const setHostnameError = await setHostname(Object.keys(config)[0]);
+        if (setHostnameError) {
+          console.error(`ERROR while set hostname: ${setHostnameError}`);
+          reject(setHostnameError);
+        }
         resolve();
       })
       .catch((err) => {
-        console.error(err);
+        console.error(`ERROR while create config file: ${err}`);
         reject(err);
       });
   });
@@ -152,13 +157,15 @@ function copyFile(fileName, destination) {
     exec(`sudo cp ${fileName} ${destination}`, (error, stdout, stderr) => {
       if (error) {
         console.error(`error: ${error.message}`);
-        reject(error.message);
-        return;
+        ignoredErrorMessages.map((msg) => {
+          if (!error.message.includes(msg)) reject(error.message);
+        });
       }
       if (stderr) {
         console.error(`stderr: ${stderr}`);
-        reject(stderr);
-        return;
+        ignoredErrorMessages.map((msg) => {
+          if (!stderr.includes(msg)) reject(stderr);
+        });
       }
       console.log(`stdout: ${stdout}`);
       resolve();
@@ -168,19 +175,22 @@ function copyFile(fileName, destination) {
 
 function setHostname(hostname) {
   return new Promise((resolve, reject) => {
-    exec(
-      `sudo bash editHostname.sh ${hostname} 2>/dev/null`,
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`error: ${error.message}`);
-        }
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
-        console.log(`stdout: ${stdout}`);
-        resolve();
+    exec(`sudo bash editHostname.sh ${hostname}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`error: ${error.message}`);
+        ignoredErrorMessages.map((msg) => {
+          if (!error.message.includes(msg)) reject(error.message);
+        });
       }
-    );
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        ignoredErrorMessages.map((msg) => {
+          if (!stderr.includes(msg)) reject(stderr);
+        });
+      }
+      console.log(`stdout: ${stdout}`);
+      resolve();
+    });
   });
 }
 
