@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -ex
+
+is_exist(){
+    if [[ ! -f "$1" ]]; then
+        echo "$1 does not exist in current directory." >&2
+        exit 1
+    fi
+}
+
+start_service(){
+    if ! systemctl is-enabled "$(basename "$1")"; then
+        systemctl enable "$(basename "$1")"
+    fi
+    systemctl restart "$(basename "$1")"
+}
+
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYS_SERVICE_PATH="/etc/systemd/system/"
+SERVER_SERVICE="$DIRNAME/SDConfigurationServer.service"
+CLIENT_SERVICE="$DIRNAME/SDConfigurationClient.service"
+
+# Check .service file exists
+is_exist "$SERVER_SERVICE"
+is_exist "$CLIENT_SERVICE"
+
+cp "$SERVER_SERVICE" "$CLIENT_SERVICE" "$SYS_SERVICE_PATH"
+
+start_service "$SERVER_SERVICE"
+start_service "$CLIENT_SERVICE"

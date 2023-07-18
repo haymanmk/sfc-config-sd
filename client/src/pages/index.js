@@ -74,6 +74,8 @@ const Page = () => {
           console.log(res);
           if (res.status === "success") {
             handleAlert("Write Successfully. Power off before Pulling SD Card Out.");
+          } else {
+            handleAlert(`Failed: ${res?.msg}`);
           }
         })
         .catch((err) => {

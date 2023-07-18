@@ -27,7 +27,10 @@ const initConfig = {
   modifyTime: "2020-04-21T08:25:41.037",
   numbers: 25,
 };
-const ignoredErrorMessages = ["Name or service not known"];
+const ignoredErrorMessages = [
+  "Name or service not known",
+  "unable to resolve host",
+];
 
 app.route("/config").post((req, res, next) => {
   const body = req.body;
@@ -158,14 +161,16 @@ function copyFile(fileName, destination) {
       if (error) {
         console.error(`error: ${error.message}`);
         ignoredErrorMessages.map((msg) => {
-          if (!error.message.includes(msg)) reject(error.message);
+          if (error.message.includes(msg)) resolve();
         });
+        reject(error.message);
       }
       if (stderr) {
         console.error(`stderr: ${stderr}`);
         ignoredErrorMessages.map((msg) => {
-          if (!stderr.includes(msg)) reject(stderr);
+          if (stderr.includes(msg)) resolve();
         });
+        reject(stderr);
       }
       console.log(`stdout: ${stdout}`);
       resolve();
@@ -175,18 +180,20 @@ function copyFile(fileName, destination) {
 
 function setHostname(hostname) {
   return new Promise((resolve, reject) => {
-    exec(`sudo bash editHostname.sh ${hostname}`, (error, stdout, stderr) => {
+    exec(`sudo bash ./editHostname.sh ${hostname}`, (error, stdout, stderr) => {
       if (error) {
         console.error(`error: ${error.message}`);
         ignoredErrorMessages.map((msg) => {
-          if (!error.message.includes(msg)) reject(error.message);
+          if (error.message.includes(msg)) resolve();
         });
+        reject(error.message);
       }
       if (stderr) {
         console.error(`stderr: ${stderr}`);
         ignoredErrorMessages.map((msg) => {
-          if (!stderr.includes(msg)) reject(stderr);
+          if (stderr.includes(msg)) resolve();
         });
+        reject(stderr);
       }
       console.log(`stdout: ${stdout}`);
       resolve();

@@ -44,3 +44,4 @@ else
 fi
 
 echo "Please reboot system to complete setting."
+sudo reboot
